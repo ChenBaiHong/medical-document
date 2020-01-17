@@ -1,0 +1,153 @@
+-- 腾讯 order_with_message 导入 lg_order 订单表，成功
+INSERT INTO hospc_test.lg_order (id,
+                            doctor_id,
+                            his_patient_id,
+                            order_no,
+                            `status`,
+                            start_order_time,
+                            end_order_time)
+
+SELECT T.order_id            AS id,
+       T.doctor_id           AS doctor_id,
+       T.external_patient_id AS his_patient_id,
+       T.order_no            AS order_no,
+       '2'                   AS `status`,
+       T.order_create_time   AS start_order_time,
+       T.order_end_time      as end_order_time
+FROM data_import.order_with_message T;
+
+-- lg_order 需要补值字段
+       wx_user_id , union_id , user_patient_id , consult_rec_id , order_type
+
+
+-- 腾讯 order_with_message 导入 im_lg_consult_record 订单表，成功
+
+
+       -- im_lg_consult_record 需要补值字段
+         `last_consult_time` , `last_replied_word` ,`replied_type` ,`replied_type_dict` ,`who_end_consult` ,`who_end_consult_dict` 
+
+
+
+-- 腾讯 message 导入 im_lg_consult_content 订单表，成功
+
+insert into hospc_test.im_lg_consult_content(`id`,
+                                  `consult_rec_id`,
+                                  `his_patient_id`,
+                                  `doctor_id`,
+                                  `replied_type`,
+                                  `replied_content`,
+                                  `chat_type`,
+                                  `ident_type`,
+                                  `u_avatar`,
+                                  `d_avatar`,
+                                  `read_status`,
+                                  `read_status_dict`,
+                                  `create_time`,
+                                  `update_time`)
+SELECT m.`id`                  as id,
+       o.`order_id`            as consult_rec_id,
+       o.`external_patient_id` as his_patient_id,
+       o.`doctor_id`           as doctor_id,
+       CASE
+           when m.`type` = 'image' then
+               5
+           when m.`type` = 'undo' then
+               7
+           when m.`type` = 'audio' then
+               2
+           else
+               1
+           END                 as replied_type,
+       m.`content`             as replied_content,
+       CASE
+
+           when m.`from_who` = 'doctor' THEN
+               2
+           when m.`from_who` = 'user' then
+               1
+           else
+               8
+           END                 as chat_type
+        ,
+       CASE
+
+           when m.`from_who` = 'doctor' THEN
+               2
+           when m.`from_who` = 'user' then
+               1
+           else
+               2
+           END                 as ident_type,
+       o.`patient_avatar`      as u_avatar,
+       o.`doctor_avatar`       as d_avatar,
+       '1'                     as read_status,
+       '已读'                    as read_status_dict,
+       o.`order_create_time`   as create_time,
+       o.`order_end_time`      as update_time
+
+FROM data_import.message m,
+     data_import.order_with_message o
+WHERE m.order_no = o.order_no;
+
+
+-- 腾讯 tb_user_patient 导入 我的 tb_user_patient 患者表成功
+INSERT INTO hospc_test.tb_user_patient (his_patient_id,
+                             union_id,
+                             card_num,
+                             epc_num,
+                             eh_card,
+                             `name`,
+                             id_card,
+                             id_card_type,
+                             mobile,
+                             child,
+                             birth,
+                             sex,
+                             is_default,
+                             yd_num,
+                             contact_name,
+                             contact_relation,
+                             contact_tel,
+                             contact_id_card,
+                             contact_id_card_type,
+                             create_time,
+                             update_time)
+SELECT j.patient_id      as his_patient_id,
+       u.unionid         as union_id,
+       j.cardnum         as card_num,
+       j.wxcardno        as epc_num,
+       j.ehcard          as eh_card,
+       j.NAME            as `name`,
+       j.idcard          as id_card,
+       '1'               as id_card_type,
+       j.mobile          as mobile,
+       CASE
+
+           when j.child = '0' THEN
+               0
+           else
+               1
+           END           as child
+        ,
+       j.birth           as birth,
+       j.sex             as sex,
+       j.isdefault       as is_default,
+       j.ydnum,
+       j.contactname     as contact_name,
+       j.contactrelation as contact_relation,
+       j.contacttel      as contact_tel,
+       j.contactidcard   as contact_id_card,
+       '1'               as contact_id_card_type,
+       FROM_UNIXTIME(
+               j.createtime,
+               '%Y-%m-%d %H:%i:%s'
+           )             as create_time,
+
+       FROM_UNIXTIME(
+               j.updatetime,
+               '%Y-%m-%d %H:%i:%s'
+           )             as update_time
+FROM data_import.tb_user_patient j
+         INNER JOIN data_import.tb_user u
+                    on j.uid = u.id
+ORDER BY j.createtime ASC;

@@ -1,0 +1,22 @@
+========开启防火墙下的8051端口 命令=======
+
+	firewall-cmd --zone=public --add-port=8051/tcp --permanent
+
+======重新载入 返回 success 代表成功======
+	firewall-cmd --reload
+
+======.查看对外开放的端口状态 ==========
+
+
+	查询已开放的端口 
+		netstat -anp
+
+	查询指定端口是否已被被防火墙放行
+		firewall-cmd --query-port=8051/tcp
+
+		提示 yes，表示开启；no表示未开启
+
+	查询已开放的端口     
+		netstat -lntp
+
+

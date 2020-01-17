@@ -1,0 +1,125 @@
+
+-- 插入查询条件：部门和工号，不为空的医生
+insert into hospc_test.lg_doctor(
+	id,
+	user_id,
+	dept_id,
+	doctor_name,
+	doctor_introduction,
+	doctor_skill,
+	doctor_level,
+	doctor_level_dict,
+	online_state,
+	online_state_dict,
+	approval_state,
+	approval_state_dict,
+	avatar,
+	worker_number,
+	telephone,
+	hospital_info_id,
+	dept_name,
+	description,
+	del_flag,
+	create_by,
+	create_time,
+	update_by,
+	update_time,
+	type
+)SELECT
+	x.id,
+	x.user_id,
+	x.dept_id,
+	x.doctor_name,
+	x.doctor_introduction,
+	x.doctor_skill,
+	x.doctor_level,
+	x.doctor_level_dict,
+	x.online_state,
+	x.online_state_dict,
+	x.approval_state,
+	x.approval_state_dict,
+	x.avatar,
+	x.worker_number,
+	x.telephone,
+	x.hospital_info_id,
+	x.dept_name,
+	x.description,
+	x.del_flag,
+	x.create_by,
+	x.create_time,
+	x.update_by,
+	x.update_time,
+	x.type
+FROM
+	hospc.lg_doctor x
+WHERE
+	x.dept_id <>''
+AND worker_number <>''
+
+
+-- 插入查询条件：部门和工号，都为空的医生
+
+insert into hospc_test.lg_doctor(
+	user_id,
+	doctor_name,
+	online_state,
+	online_state_dict,
+	approval_state,
+	approval_state_dict,
+	avatar,
+	del_flag,
+	create_by,
+	create_time,
+	update_by,
+	update_time,
+	type
+)SELECT
+	x.user_id,
+	x.doctor_name,
+	x.online_state,
+	x.online_state_dict,
+	x.approval_state,
+	x.approval_state_dict,
+	x.avatar,
+	x.del_flag,
+	x.create_by,
+	x.create_time,
+	x.update_by,
+	x.update_time,
+	x.type
+FROM
+	hospc.lg_doctor x
+WHERE
+	x.dept_id = ''
+AND x.worker_number = ''
+
+-- 插入查询条件： 部门电话为空的部门
+
+INSERT INTO hospc.lg_department (
+	id,
+	dept_name,
+	dept_icon,
+	tel_phone,
+	hospital_info_id,
+	del_flag,
+	create_by,
+	create_time,
+	update_by,
+	update_time,
+	type
+) SELECT
+	S.id,
+	S.dept_name,
+	S.dept_icon,
+	S.tel_phone,
+	'1' AS hospital_info_id,
+	S.del_flag,
+	S.create_by,
+	S.create_time,
+	S.update_by,
+	S.update_time,
+	S.type
+FROM
+	hospc_test.lg_department S
+WHERE
+	tel_phone <> ''
